@@ -140,41 +140,40 @@ function vueJsxPlugin(options = {}) {
         for (const node of result.ast.program.body) {
           if (node.type === 'VariableDeclaration') {
             const names = parseComponentDecls(node, code)
-            if (names.length) {
-              declaredComponents.push(...names)
-            }
+            if (names.length) declaredComponents.push(...names)
+            continue
           }
 
           if (node.type === 'ExportNamedDeclaration') {
-            if (
-              node.declaration &&
-              node.declaration.type === 'VariableDeclaration'
-            ) {
+            const {declaration, specifiers} = node
+            if (declaration && declaration.type === 'VariableDeclaration') {
               hotComponents.push(
-                ...parseComponentDecls(node.declaration, code).map(
-                  ({ name }) => ({
-                    local: name,
-                    exported: name,
-                    id: hash(id + name)
-                  })
-                )
+                ...parseComponentDecls(declaration, code).map(({ name }) => ({
+                  local: name,
+                  exported: name,
+                  id: hash(id + name)
+                }))
               )
-            } else if (node.specifiers.length) {
-              for (const spec of node.specifiers) {
-                if (
-                  spec.type === 'ExportSpecifier' &&
-                  spec.exported.type === 'Identifier'
-                ) {
-                  const matched = declaredComponents.find(
-                    ({ name }) => name === spec.local.name
-                  )
-                  if (matched) {
-                    hotComponents.push({
+            } else if (
+              declaration &&
+              declaration.type === 'ClassDeclaration' &&
+              isExtendClassComponet(declaration)
+            ) {
+              const name = node.declaration.id.name
+              hotComponents.push({
+                local: name,
+                exported: name,
+                id: hash(id + name)
+              })
+            } else if (specifiers.length) {
+              for (const spec of specifiers) {
+                if (spec.type === 'ExportSpecifier' && spec.exported.type === 'Identifier') {
+                  const matched = declaredComponents.find(({ name }) => name === spec.local.name)
+                  if (matched) hotComponents.push({
                       local: spec.local.name,
                       exported: spec.exported.name,
                       id: hash(id + spec.exported.name)
                     })
-                  }
                 }
               }
             }
@@ -183,22 +182,29 @@ function vueJsxPlugin(options = {}) {
           if (node.type === 'ExportDefaultDeclaration') {
             if (node.declaration.type === 'Identifier') {
               const _name = node.declaration.name
-              const matched = declaredComponents.find(
-                ({ name }) => name === _name
-              )
-              if (matched) {
-                hotComponents.push({
+              const matched = declaredComponents.find(({ name }) => name === _name)
+              if (matched) hotComponents.push({
                   local: node.declaration.name,
                   exported: 'default',
                   id: hash(id + 'default')
                 })
-              }
             } else if (isDefineComponentCall(node.declaration)) {
               hasDefault = true
               hotComponents.push({
                 local: '__default__',
                 exported: 'default',
                 id: hash(id + 'default')
+              })
+            } else if (
+              node.declaration &&
+              node.declaration.type === 'ClassDeclaration' &&
+              isExtendClassComponet(node.declaration)
+            ) {
+              const name = node.declaration.id.name
+              hotComponents.push({
+                local: name,
+                exported: 'default',
+                id: hash(id + name)
               })
             }
           }
@@ -258,10 +264,9 @@ function vueJsxPlugin(options = {}) {
 function parseComponentDecls(node, source) {
   const names = []
   for (const decl of node.declarations) {
-    if (decl.id.type === 'Identifier' && isDefineComponentCall(decl.init)) {
-      names.push({
-        name: decl.id.name
-      })
+    if (decl.id.type !== 'Identifier') continue
+    if (isDefineComponentCall(decl.init) || isClassComponentDefine(decl.init)) {
+      names.push({ name: decl.id.name })
     }
   }
   return names
@@ -278,6 +283,28 @@ function isDefineComponentCall(node) {
     node.callee.name === 'defineComponent'
   )
 }
+
+/**
+ * @param {import('@babel/core').types.Node} node
+ */
+function isClassComponentDefine(node) {
+  return (
+    node &&
+    node.type === 'ClassExpression' &&
+    isExtendClassComponet(node)
+  )
+}
+/**
+ * @param {import('@babel/core').types.Node} node
+ */
+function isExtendClassComponet(node) {
+  return (
+    node &&
+    node.superClass &&
+    node.superClass.name === 'VueComponent'
+  )
+}
+
 
 module.exports = vueJsxPlugin
 vueJsxPlugin.default = vueJsxPlugin

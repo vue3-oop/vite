@@ -12,7 +12,11 @@
     "vue": "^3.2.25"
   },
   "devDependencies": {
+    "@abraham/reflection": "^0.8.0",
     "@vitejs/plugin-vue": "workspace:*",
-    "@vitejs/plugin-vue-jsx": "workspace:*"
+    "@vitejs/plugin-vue-jsx": "workspace:*",
+    "injection-js": "^2.4.0",
+    "rollup-plugin-typescript2": "^0.31.1",
+    "vue3-oop": "^0.1.1"
   }
 }
