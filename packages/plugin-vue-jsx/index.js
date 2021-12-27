@@ -43,6 +43,7 @@ function vueJsxPlugin(options = {}) {
   let root = ''
   let needHmr = false
   let needSourceMap = true
+  let tsconfig
 
   return {
     name: 'vite:vue-jsx',
@@ -55,10 +56,9 @@ function vueJsxPlugin(options = {}) {
         ? config.define.__VUE_PROD_DEVTOOLS__
         : undefined
       return {
-        // only apply esbuild to ts files
-        // since we are handling jsx and tsx now
+        // support ts decorators to use tsc compile
         esbuild: {
-          include: /\.ts$/
+          include: /\.esbuild\./
         },
         define: {
           __VUE_OPTIONS_API__: optionsApi != null ? optionsApi : true,
@@ -88,23 +88,54 @@ function vueJsxPlugin(options = {}) {
     transform(code, id, opt) {
       const ssr = typeof opt === 'boolean' ? opt : (opt && opt.ssr) === true
       const {
-        include,
-        exclude,
+        include = /\.(jsx|tsx?)$/,
+        exclude = /\.esbuild\./,
         babelPlugins = [],
         ...babelPluginOptions
       } = options
 
-      const filter = createFilter(include || /\.[jt]sx$/, exclude)
+      const filter = createFilter(include, exclude)
 
       if (filter(id)) {
-        const plugins = [importMeta, [jsx, babelPluginOptions], ...babelPlugins]
-        if (id.endsWith('.tsx')) {
-          plugins.push([
-            require('@babel/plugin-transform-typescript'),
-            // @ts-ignore
-            { isTSX: true, allowExtensions: true }
-          ])
+        if (/\.tsx?/.test(id)) {
+          const ts = require('typescript')
+          if (!tsconfig) {
+            const configPath = ts.findConfigFile(
+              './',
+              ts.sys.fileExists,
+              'tsconfig.json'
+            )
+            if (!configPath) {
+              throw new Error('Could not find a valid "tsconfig.json".')
+            }
+            tsconfig = ts.parseJsonConfigFileContent(
+              { extends: './tsconfig.json' },
+              ts.sys,
+              path.dirname(path.resolve(configPath))
+            )
+            if (!tsconfig.options) tsconfig.options = {}
+            Object.assign(tsconfig.options, {
+              sourceMap: false,
+              inlineSourceMap: needSourceMap,
+              inlineSources: needSourceMap
+            })
+          }
+          const { outputText, diagnostics } = ts.transpileModule(code, {
+            compilerOptions: tsconfig.options,
+            fileName: id,
+            reportDiagnostics: true
+          })
+          if (diagnostics?.[0]) throw new Error(diagnostics[0].messageText)
+          code = outputText
+          if (!id.endsWith('x')) {
+            return {
+              code: code
+            }
+          }
         }
+
+        /** @type {any[]} */
+        const plugins = [importMeta, ...babelPlugins, [jsx, babelPluginOptions]]
 
         const result = babel.transformSync(code, {
           babelrc: false,
@@ -114,6 +145,7 @@ function vueJsxPlugin(options = {}) {
           sourceFileName: id,
           configFile: false
         })
+
 
         if (!ssr && !needHmr) {
           return {
@@ -141,6 +173,11 @@ function vueJsxPlugin(options = {}) {
           if (node.type === 'VariableDeclaration') {
             const names = parseComponentDecls(node, code)
             if (names.length) declaredComponents.push(...names)
+            continue
+          }
+
+          if (node.type === 'ClassDeclaration' && isExtendClassComponet(node)) {
+            declaredComponents.push({ name: node.id.name })
             continue
           }
 

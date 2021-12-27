@@ -11,7 +11,7 @@
     "lib": ["esnext", "dom"],
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
-    "useDefineForClassFields": false,
+    "useDefineForClassFields": false
   },
   "include": ["./**/*.ts", "./**/*.tsx", "./**/*.vue"]
 }

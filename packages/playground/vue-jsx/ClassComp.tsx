@@ -1,36 +1,41 @@
 import { Component, Ref, VueComponent, VueService } from 'vue3-oop'
-import { Injectable } from 'injection-js'
+import { CountService } from './count.service'
 
-@Injectable()
-class CountService extends VueService {
-  @Ref() count = 1
-  add() {
-    this.count++
-  }
-}
 
 
 @Component()
 export class DeclareComponent extends VueComponent {
   constructor(private countService: CountService) {super()}
   @Ref() count = 1
+
+  add() {
+    this.count++
+  }
+
   render() {
     return (
-      <div onClick={() => this.countService.add()}>
-        DeclareComponentaaaa
-        count: {this.count}
-        countService: {this.countService.count}
+      <>
+        <div onClick={() => this.countService.add()}>
+          DeclareComponentaaaa
+          count: {this.count}
+          countService: {this.countService.count}
+        </div>
+        <div onClick={() => this.add()}>
+          self count: {this.count}
+        </div>
+      </>
+    )
+  }
+}
+
+class DefaultComp extends VueComponent {
+  render() {
+    return (
+      <div>
+        DefaultComp1111ssss
       </div>
     )
   }
 }
 
-export default class DefaultComp extends VueComponent {
-  render() {
-    return (
-      <div>
-        DefaultComp1111
-      </div>
-    )
-  }
-}
+export default DefaultComp
