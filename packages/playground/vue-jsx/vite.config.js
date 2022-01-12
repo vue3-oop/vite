@@ -7,7 +7,8 @@ const vuePlugin = require('@vitejs/plugin-vue')
 module.exports = {
   plugins: [
     vueJsxPlugin({
-      include: [/\.tesx$/, /\.[jt]sx?$/]
+      slotStable: true,
+      include: [/\.tesx$/, /\.[jt]sx?$/],
     }),
     vuePlugin()
   ],

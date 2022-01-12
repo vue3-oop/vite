@@ -1,5 +1,5 @@
 import { Plugin } from 'vite'
-import { VueJSXPluginOptions } from '@vue/babel-plugin-jsx'
+import { VueJSXPluginOptions } from '@vue3-oop/babel-plugin-jsx'
 import { FilterPattern } from '@rollup/pluginutils'
 
 declare interface FilterOptions {

@@ -1,6 +1,6 @@
 // @ts-check
 const babel = require('@babel/core')
-const jsx = require('@vue/babel-plugin-jsx')
+const jsx = require('@vue3-oop/babel-plugin-jsx')
 const importMeta = require('@babel/plugin-syntax-import-meta')
 const { createFilter, normalizePath } = require('@rollup/pluginutils')
 const hash = require('hash-sum')

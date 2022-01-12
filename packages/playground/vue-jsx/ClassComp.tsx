@@ -23,6 +23,7 @@ export class DeclareComponent extends VueComponent {
         <div onClick={() => this.add()}>
           self count: {this.count}
         </div>
+        {this.context.slots.default?.()}
       </>
     )
   }

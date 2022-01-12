@@ -17,7 +17,7 @@ function App() {
       <OtherExt />
       <JsxScript />
       <JsxSrcImport />
-      <DeclareComponent />
+      <DeclareComponent><Named /></DeclareComponent>
       <DefaultComp />
     </>
   )
