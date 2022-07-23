@@ -1,6 +1,6 @@
 // @ts-check
 const babel = require('@babel/core')
-const jsx = require('@vue3-oop/babel-plugin-jsx')
+const jsx = require('@vue/babel-plugin-jsx')
 const importMeta = require('@babel/plugin-syntax-import-meta')
 const { createFilter, normalizePath } = require('@rollup/pluginutils')
 const hash = require('hash-sum')
@@ -43,10 +43,11 @@ function vueJsxPlugin(options = {}) {
   let root = ''
   let needHmr = false
   let needSourceMap = true
+  let isProd = false
   let tsconfig
 
   return {
-    name: 'vite:vue-jsx',
+    name: 'vue3-oop:vue-jsx',
 
     config(config) {
       const optionsApi = config.define
@@ -71,6 +72,7 @@ function vueJsxPlugin(options = {}) {
       needHmr = config.command === 'serve' && !config.isProduction
       needSourceMap = config.command === 'serve' || !!config.build.sourcemap
       root = config.root
+      isProd = config.isProduction
     },
 
     resolveId(id) {
@@ -115,12 +117,12 @@ function vueJsxPlugin(options = {}) {
             )
             if (!tsconfig.options) tsconfig.options = {}
             Object.assign(tsconfig.options, {
-              sourceMap: false,
-              inlineSourceMap: needSourceMap,
-              inlineSources: needSourceMap
+              sourceMap: isProd && needSourceMap,
+              inlineSourceMap: !isProd && needSourceMap,
+              inlineSources: !isProd && needSourceMap
             })
           }
-          const { outputText, diagnostics } = ts.transpileModule(code, {
+          const { outputText, diagnostics, sourceMapText } = ts.transpileModule(code, {
             compilerOptions: tsconfig.options,
             fileName: id,
             reportDiagnostics: true
@@ -129,7 +131,8 @@ function vueJsxPlugin(options = {}) {
           code = outputText
           if (!id.endsWith('x')) {
             return {
-              code: code
+              code: code,
+              map: (isProd && needSourceMap) ? sourceMapText : undefined,
             }
           }
         }
