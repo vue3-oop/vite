@@ -1,3 +1,22 @@
+## [1.4.5](https://github.com/vue3-oop/vite/compare/plugin-vue-jsx@1.3.2...plugin-vue-jsx@1.4.5) (2022-11-16)
+
+
+### Bug Fixes
+
+* fix .d.ts ([0d64cfd](https://github.com/vue3-oop/vite/commit/0d64cfd6cf10d14a4e5a00979173792d16a13375))
+
+
+### Features
+
+* jsx替换为自己的 ([c8b349d](https://github.com/vue3-oop/vite/commit/c8b349d09230512f8b648b1cd0d49b993b4c86d8))
+* jsx替换为自己的 ([ba8f116](https://github.com/vue3-oop/vite/commit/ba8f11600a9d3720e4f65348aaabde306da23069))
+* **plugin-vue-jsx:** support build sourcemap ([58ee46c](https://github.com/vue3-oop/vite/commit/58ee46c9cc42a6a55cf87769e778837de7bf5345))
+* **plugin-vue-jsx:** 支持编译noe_modules中的tsx?文件代码 ([cdae8ab](https://github.com/vue3-oop/vite/commit/cdae8abefa61e3cef3d48a33b8eecc568a395af5))
+* support class component ([4b17672](https://github.com/vue3-oop/vite/commit/4b17672fc65358beb8143777bdfbbb7c1bf2c4ec))
+* use tsc compile ([491db6c](https://github.com/vue3-oop/vite/commit/491db6c7480033dbff4e03b4ac493d4e3e675d43))
+
+
+
 ## [1.4.1](https://github.com/vue3-oop/vite/compare/plugin-vue-jsx@1.3.2...plugin-vue-jsx@1.4.1) (2022-07-23)
 
 
