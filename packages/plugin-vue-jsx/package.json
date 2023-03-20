@@ -1,6 +1,6 @@
 {
   "name": "@vue3-oop/plugin-vue-jsx",
-  "version": "1.4.5",
+  "version": "1.4.6",
   "license": "MIT",
   "author": "agilegao",
   "files": [
@@ -12,9 +12,6 @@
   "scripts": {
     "changelog": "conventional-changelog -p angular -i CHANGELOG.md -s --commit-path . --lerna-package plugin-vue-jsx",
     "release": "node ../../scripts/release.cjs --skipBuild"
-  },
-  "engines": {
-    "node": ">=12.0.0"
   },
   "repository": {
     "type": "git",
@@ -36,6 +33,6 @@
     "typescript": "^4.4.4"
   },
   "peerDependencies": {
-    "typescript": "^4.4.4"
+    "typescript": "*"
   }
 }
